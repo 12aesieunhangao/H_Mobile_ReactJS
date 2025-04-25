@@ -6,7 +6,7 @@ import { useAuth } from "../context/AuthContext";
 export default function AdminPage() {
   const { user } = useAuth();
 
-  // Kiểm tra quyền admin (giả sử chỉ admin mới truy cập được)
+  // Kiểm tra quyền admin (chỉ admin mới truy cập được)
   if (!user || user.role !== "admin") {
     return (
       <div className="container mx-auto mt-6 px-4">

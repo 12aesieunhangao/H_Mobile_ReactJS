@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
+import { useAuth } from "@/app/context/AuthContext";
 import { useRouter } from "next/navigation";
 
 const LoginPage = () => {
-  const [email, setEmail] = useState(""); // Đổi từ username thành email
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const { login } = useAuth();
+  const { login, logout, user } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    const result = await login(email, password); // Truyền email thay vì username
+    const result = await login(email, password);
     if (result.success) {
       alert("Đăng nhập thành công!");
       if (result.role === "admin") {
@@ -23,10 +23,29 @@ const LoginPage = () => {
         router.push("/");
       }
     } else {
-      alert("Sai email hoặc mật khẩu!"); // Cập nhật thông báo lỗi
+      alert("Sai email hoặc mật khẩu!");
     }
     setIsLoading(false);
   };
+
+  const handleLogout = () => {
+    logout();
+    router.push("/");
+  };
+
+  if (user) {
+    return (
+      <div className="container mx-auto mt-6 px-4 text-center">
+        <h2 className="text-2xl font-bold">Chào {user.email}</h2>
+        <button
+          onClick={handleLogout}
+          className="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+        >
+          Đăng xuất
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto mt-6 px-4">
@@ -44,9 +63,9 @@ const LoginPage = () => {
                 Email
               </label>
               <input
-                type="email" // Đổi type thành email
+                type="email"
                 id="email"
-                placeholder="Nhập email của bạn" // Cập nhật placeholder
+                placeholder="Nhập email của bạn"
                 className="w-full border border-[#3399FF] rounded-full px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#3399FF]"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -80,7 +99,7 @@ const LoginPage = () => {
           </form>
           <p className="text-center text-gray-700 mt-4">
             Chưa có tài khoản?{" "}
-            <a href="/" className="text-[#3399FF] hover:underline">
+            <a href="/register" className="text-[#3399FF] hover:underline">
               Đăng ký ngay
             </a>
           </p>

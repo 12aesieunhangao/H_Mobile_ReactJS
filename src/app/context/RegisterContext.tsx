@@ -2,12 +2,14 @@
 
 import { createContext, useContext, useState, ReactNode } from "react";
 import { useRouter } from "next/navigation";
+import { useAuth } from "./AuthContext"; // Import useAuth để gọi login
 
 export interface IRegisterUser {
   name: string;
   email: string;
   phone: string;
   password: string;
+  avatar?: string | null;
 }
 
 export interface RegisterContextType {
@@ -30,12 +32,12 @@ export const RegisterProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const router = useRouter();
+  const { login } = useAuth(); // Sử dụng useAuth để lấy hàm login
 
   const register = async (user: IRegisterUser, confirmPassword: string): Promise<void> => {
     setIsLoading(true);
     setError("");
 
-    // Kiểm tra mật khẩu xác nhận
     if (user.password !== confirmPassword) {
       setError("Mật khẩu và xác nhận mật khẩu không khớp!");
       setIsLoading(false);
@@ -43,7 +45,6 @@ export const RegisterProvider = ({ children }: { children: ReactNode }) => {
     }
 
     try {
-      // Kiểm tra xem email đã tồn tại chưa
       const usersResponse = await fetch("http://localhost:3000/users");
       if (!usersResponse.ok) {
         throw new Error("Không thể lấy danh sách người dùng");
@@ -57,7 +58,6 @@ export const RegisterProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Email đã tồn tại");
       }
 
-      // Gửi yêu cầu POST để thêm người dùng mới
       const response = await fetch("http://localhost:3000/users", {
         method: "POST",
         headers: {
@@ -70,8 +70,18 @@ export const RegisterProvider = ({ children }: { children: ReactNode }) => {
         throw new Error("Đăng ký thất bại!");
       }
 
-      alert("Đăng ký thành công!");
-      router.push("/login"); // Chuyển hướng đến trang đăng nhập
+      // Sau khi đăng ký thành công, tự động đăng nhập
+      const loginResult = await login(user.email, user.password);
+      if (loginResult.success) {
+        alert("Đăng ký và đăng nhập thành công!");
+        if (loginResult.role === "admin") {
+          router.push("/admin");
+        } else {
+          router.push("/");
+        }
+      } else {
+        throw new Error("Tự động đăng nhập thất bại. Vui lòng đăng nhập thủ công.");
+      }
     } catch (err: any) {
       setError(err.message || "Có lỗi xảy ra khi đăng ký!");
       throw err;

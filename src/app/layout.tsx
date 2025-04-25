@@ -5,7 +5,7 @@ import Header from "./component/header/page";
 import Footer from "./component/footer/page";
 import { AuthProvider } from "./context/AuthContext";
 import { RegisterProvider } from "./context/RegisterContext";
-import { CartProvider } from "./state/CartContext"; // Thêm CartProvider
+import { CartProvider } from "./state/CartContext";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,15 +36,15 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        <CartProvider>
-          <Header />
-          <AuthProvider>
+        <AuthProvider>
+          <CartProvider>
             <RegisterProvider>
+              <Header />
               {children}
+              <Footer />
             </RegisterProvider>
-          </AuthProvider>
-          <Footer />
-        </CartProvider>
+          </CartProvider>
+        </AuthProvider>
       </body>
     </html>
   );
